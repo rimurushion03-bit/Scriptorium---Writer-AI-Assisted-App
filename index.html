@@ -50,9 +50,19 @@ html, body { height: 100%; background: var(--bg); color: var(--tx); font-family:
   display: flex; align-items: center; gap: 4px;
   transition: .15s;
 }
-.tbbtn:hover, .tbbtn.on { background: var(--gdim); border-color: var(--gold); color: var(--gold2); }
+.tbbtn:hover { background: var(--gdim); border-color: var(--gold); color: var(--gold2); }
+.tbbtn:active { background: var(--gdim); border-color: var(--gold); color: var(--gold2); transition: background .4s ease-out, border-color .4s ease-out, color .4s ease-out; }
 #undo-btn, #redo-btn { display: none !important; }
 #undo-btn.show, #redo-btn.show { display: inline-flex !important; }
+.urbtn {
+  background: var(--s2); border: 1px solid var(--b1); color: var(--tx2);
+  border-radius: var(--rsm); padding: 5px 9px; font-size: 11px;
+  font-family: 'Outfit', sans-serif; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: .15s;
+}
+.urbtn:hover { background: var(--gdim); border-color: var(--gold); color: var(--gold2); }
+.urbtn:active { background: var(--gdim); border-color: var(--gold); color: var(--gold2); transition: background .4s ease-out, border-color .4s ease-out, color .4s ease-out; }
 
 /* ══ MAIN AREA ══ */
 #main { overflow: hidden; position: relative; }
@@ -227,13 +237,14 @@ html, body { height: 100%; background: var(--bg); color: var(--tx); font-family:
 body.fm #bnav { display: none; }
 body.fm #app { grid-template-rows: auto 1fr 0; }
 body.fm #editor-content { font-size: 18px; line-height: 2.1; padding: 20px 22px 60px; }
-#fmexit {
-  position: fixed; top: 12px; right: 12px; z-index: 300;
-  background: var(--s2); border: 1px solid var(--b2); color: var(--tx3);
-  border-radius: 20px; padding: 5px 12px; font-size: 11px;
-  font-family: 'Outfit', sans-serif; cursor: pointer; display: none;
-}
-body.fm #fmexit { display: block; }
+body.fm #wcbar { display: none; }
+body.fm #install-btn { display: none !important; }
+body.fm .tbbtn:not(#focus-btn):not(#undo-btn):not(#redo-btn) { display: none; }
+body.fm .urbtn { display: inline-flex !important; }
+body.fm .logo em { display: none; }
+body.fm #fm-wc { display: block; }
+#fm-wc { display: none; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--tx3); margin-left: 8px; }
+
 
 /* ══ CHARACTERS ══ */
 .cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; padding: 0 14px 14px; }
@@ -371,12 +382,15 @@ body.fm #fmexit { display: block; }
 
   <!-- TOPBAR -->
   <div id="topbar">
-    <div class="logo">Scriptorium <em>writing suite</em></div>
+    <div style="display:flex;align-items:center;">
+      <div class="logo">Scriptorium <em>writing suite</em></div>
+      <span id="fm-wc">0 kata</span>
+    </div>
     <div class="tbbtns">
       <button class="tbbtn" id="install-btn" onclick="installPWA()" style="display:none;border-color:var(--gold);color:var(--gold2);">⬇ Install</button>
       <button class="tbbtn" id="focus-btn" onclick="toggleFocus()">⊡ Fokus</button>
-      <button class="tbbtn" id="undo-btn" onclick="doUndo()" title="Undo">↩</button>
-      <button class="tbbtn" id="redo-btn" onclick="doRedo()" title="Redo">↪</button>
+      <button class="urbtn" id="undo-btn" onclick="doUndo()" title="Undo">↩</button>
+      <button class="urbtn" id="redo-btn" onclick="doRedo()" title="Redo">↪</button>
       <button class="tbbtn" onclick="om('set-modal')">⚙</button>
       <button class="tbbtn" onclick="openExport()">⬆ Export</button>
     </div>
@@ -483,7 +497,6 @@ Ketuk ✍ untuk toolbar."></div>
 </div>
 
 <!-- FOCUS EXIT -->
-<button id="fmexit" onclick="toggleFocus()">✕ Keluar Fokus</button>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -751,9 +764,10 @@ function toast(msg) {
 function toggleFocus() {
   S.focusMode = !S.focusMode;
   document.body.classList.toggle('fm', S.focusMode);
-  document.getElementById('focus-btn').classList.toggle('on', S.focusMode);
+  // focus-btn tidak pakai state .on — visual cukup dari :active
   if (S.focusMode) {
     switchPanel('editor', 1); ed.focus();
+    updateFmWc();
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
@@ -765,12 +779,16 @@ function toggleFocus() {
   }
   scheduleSave();
 }
+function updateFmWc() {
+  const wc = cw(((ed && ed.innerText)||'').trim());
+  document.getElementById('fm-wc').textContent = wc + ' kata';
+}
 
 document.addEventListener('fullscreenchange', () => {
   if (!document.fullscreenElement && S.focusMode) {
     S.focusMode = false;
     document.body.classList.remove('fm');
-    document.getElementById('focus-btn').classList.remove('on');
+    // focus-btn tidak pakai state .on
   }
 });
 
@@ -792,14 +810,14 @@ document.addEventListener('fullscreenchange', () => {
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
   function showBubble() {
-    if (bx < 0) { bx = VW() - 56; by = VT() + VH() * 0.4; }
+    if (bx < 0) { bx = VW() - 56; by = VT() + VH() * 0.4; } // default kanan
     bubble.style.left = bx + 'px';
     bubble.style.top  = by + 'px';
     bubble.style.display = 'flex';
     panel.style.display = 'none';
   }
   function showPanel() {
-    if (px < 0) { px = VW() - 64; py = VT() + VH() * 0.25; }
+    if (px < 0) { px = 8; py = VT() + VH() * 0.25; } // default kiri
     px = clamp(px, 4, VW() - 68);
     py = clamp(py, VT() + 4, VT() + VH() - 90);
     panel.style.left = px + 'px';
@@ -819,8 +837,7 @@ document.addEventListener('fullscreenchange', () => {
 
   bubble.addEventListener('click', () => {
     // Hanya set posisi panel dari bubble jika panel belum pernah dipindahkan
-    if (px < 0) { px = bx - 8; py = by - 20; }
-    showPanel();
+    showPanel(); // panel selalu spawn di kiri (default px=8)
   });
 
   // ── DRAG ──
@@ -848,7 +865,7 @@ document.addEventListener('fullscreenchange', () => {
   let tapMoved = false;
   bubble.addEventListener('touchstart', e => { tapMoved = false; startDrag(bubble, e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
   bubble.addEventListener('touchmove', e => { tapMoved = true; moveDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
-  bubble.addEventListener('touchend', e => { if (!tapMoved) { if (px < 0) { px = bx - 8; py = by - 20; } showPanel(); } endDrag(); });
+  bubble.addEventListener('touchend', e => { if (!tapMoved) { showPanel(); } endDrag(); });
 
   handle.addEventListener('touchstart', e => startDrag(panel, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
   handle.addEventListener('touchmove', e => { moveDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
@@ -877,6 +894,7 @@ ed.addEventListener('input', () => {
 function updateWC() {
   const wc = cw(((ed && ed.innerText)||'').trim());
   document.getElementById('wc-txt').textContent = wc + ' kata';
+  document.getElementById('fm-wc').textContent = wc + ' kata';
 }
 function ins(cmd, arg) {
   ed.focus();
@@ -1256,6 +1274,7 @@ window.saveWorld = saveWorld;
 window.switchPanel = switchPanel;
 window.switchWTab = switchWTab;
 window.toggleFocus = toggleFocus;
+
 window.toggleKey = toggleKey;
 
 });
