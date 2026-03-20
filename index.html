@@ -433,7 +433,7 @@ body.fm #fm-wc { display: block; }
             <div class="stitle"><em>Bab &</em> Adegan</div>
             <div style="display:flex;align-items:center;gap:5px;">
               <div class="ssub" id="proj-lbl">Proyek Baru</div>
-              <button onclick="om('proj-modal')" title="Ganti Project" style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:13px;padding:0 2px;line-height:1;transition:.15s;" onmouseover="this.style.color='var(--gold2)'" onmouseout="this.style.color='var(--tx3)'">📁</button>
+              <button onclick="openProjScreen()" title="Ganti Project" style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:13px;padding:0 2px;line-height:1;transition:.15s;" onmouseover="this.style.color='var(--gold2)'" onmouseout="this.style.color='var(--tx3)'">📁</button>
             </div>
           </div>
         </div>
@@ -611,12 +611,27 @@ Ketuk ✍ untuk toolbar."></div>
   </div>
 </div>
 
-<div id="ee-modal" style="position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
+<!-- CONFIRM MODAL -->
+<div class="mbk" id="confirm-modal">
+  <div class="mdl">
+    <div class="mhnd"></div>
+    <div class="mhdr"><div class="mtitle" id="confirm-title">Konfirmasi</div><button class="mclose" onclick="cm('confirm-modal')">×</button></div>
+    <div class="mbdy">
+      <div style="font-size:13px;color:var(--tx2);line-height:1.7;" id="confirm-msg"></div>
+    </div>
+    <div class="mftr">
+      <button class="bsec" onclick="cm('confirm-modal')">Batal</button>
+      <button class="bpri" id="confirm-ok" style="background:var(--red);border-color:var(--red);">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div id="ee-modal" style="position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);" onclick="if(event.target===this)this.style.display='none';">
   <div style="background:var(--s2);border:1px solid var(--b2);border-radius:18px;padding:20px 18px;width:80%;max-width:300px;text-align:center;animation:sup .25s cubic-bezier(.34,1.56,.64,1);">
     <div style="font-size:28px;margin-bottom:6px;display:inline-block;animation:eespin 3s linear infinite;">✦</div>
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold2);margin-bottom:10px;">Hey, you found me!</div>
     <div id="ee-msg" style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px;min-height:36px;font-style:italic;"></div>
-    <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">Btw recehannya tuan 🗿</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">Btw recehannya tuan 🪙</div>
     <a href="https://trakteer.id/AntoSJ13" target="_blank"
       style="display:block;background:linear-gradient(135deg,#e8622a,#c94a1a);color:#fff;border-radius:20px;padding:9px;font-size:12px;font-weight:600;text-decoration:none;margin-bottom:6px;letter-spacing:.04em;">
       ☕ TRAKTEER
@@ -739,8 +754,11 @@ Ketuk ✍ untuk toolbar."></div>
       <div class="expgrid">
         <div class="expcard" onclick="expTXT()"><div class="expico">📄</div><div class="explbl">TXT</div><div class="expdsc">Plain text</div></div>
         <div class="expcard" onclick="expMD()"><div class="expico">📝</div><div class="explbl">Markdown</div><div class="expdsc">Format .md</div></div>
-        <div class="expcard" onclick="expHTML()"><div class="expico">🌐</div><div class="explbl">HTML</div><div class="expdsc">Siap dibaca</div></div>
         <div class="expcard" onclick="expJSON()"><div class="expico">💾</div><div class="explbl">Backup JSON</div><div class="expdsc">Seluruh data</div></div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;">
+        <div class="expcard" style="flex:1;margin:0;" onclick="expHTML()"><div class="expico">🌐</div><div class="explbl">Download HTML</div><div class="expdsc">File .html</div></div>
+        <div class="expcard" style="flex:1;margin:0;" onclick="expHTMLCopy()"><div class="expico">📋</div><div class="explbl">Copy HTML</div><div class="expdsc">Salin ke clipboard</div></div>
       </div>
     </div>
   </div>
@@ -782,7 +800,7 @@ Ketuk ✍ untuk toolbar."></div>
         <div class="ssecttitle">Data</div>
         <button class="bsec" style="width:100%;padding:9px;border-radius:var(--rsm);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;margin-bottom:7px;" onclick="document.getElementById('imp-file').click()">📂 Import Backup JSON</button>
         <input type="file" id="imp-file" accept=".json" style="display:none" onchange="doImport(event)">
-        <button class="bsec" style="width:100%;padding:9px;border-radius:var(--rsm);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;border-color:var(--red);color:var(--red);" onclick="clearAll()">🗑 Hapus Semua Data</button>
+        <button class="bsec" style="width:100%;padding:9px;border-radius:var(--rsm);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;border-color:var(--red);color:var(--red);" onclick="showConfirm('Hapus Semua Data', 'Semua project, bab, karakter, dan riwayat akan dihapus permanen. Tidak bisa di-undo!', clearAll)">🗑 Hapus Semua Data</button>
       </div>
     </div>
     <div class="mftr"><button class="bsec" onclick="cm('set-modal')">Batal</button><button class="bpri" onclick="saveSettings()">Simpan</button></div>
@@ -823,6 +841,7 @@ const dbDel = k => new Promise((res, rej) => { const r = db.transaction('kv','re
 // Project management state
 let activeProjectId = null;
 let projectList = [];
+let _bootReady = false; // Guard: blokir save sebelum boot selesai
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 const S = {
@@ -837,7 +856,7 @@ const S = {
 let saveT;
 function scheduleSave() { clearTimeout(saveT); saveT = setTimeout(persist, 1500); }
 async function persist() {
-  if (!db || !activeProjectId) return;
+  if (!db || !activeProjectId || !_bootReady) return;
   const d = { ...S }; delete d.lastAI;
   await dbSet('proj_' + activeProjectId, JSON.stringify(d));
   const meta = projectList.find(p => p.id === activeProjectId);
@@ -852,6 +871,7 @@ async function persist() {
 async function loadProjects() {
   const raw = await dbGet('projects');
   if (raw) try { projectList = JSON.parse(raw); } catch(e) {}
+  // Migrasi data lama
   if (projectList.length === 0) {
     const oldRaw = await dbGet('state');
     if (oldRaw) {
@@ -861,11 +881,10 @@ async function loadProjects() {
         projectList = [{ id, name: oldData.proj||'Proyek Lama', createdAt: Date.now(), updatedAt: Date.now(), wordCount: 0, chapCount: (oldData.chapters||[]).length }];
         await dbSet('proj_' + id, oldRaw);
         await dbSet('projects', JSON.stringify(projectList));
-        activeProjectId = id;
-        return;
       } catch(e) {}
     }
   }
+  // Set active project — selalu jalan
   const lastActive = await dbGet('active_project');
   if (lastActive && projectList.find(p => p.id === lastActive)) {
     activeProjectId = lastActive;
@@ -875,34 +894,197 @@ async function loadProjects() {
 }
 async function loadActiveProject() {
   if (!activeProjectId) return;
-  const raw = await dbGet('proj_' + activeProjectId);
-  if (raw) try { Object.assign(S, JSON.parse(raw)); } catch(e) {}
+  try {
+    const raw = await dbGet('proj_' + activeProjectId);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Validasi: pastikan data punya struktur yang benar sebelum assign
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (Array.isArray(parsed.chapters)) Object.assign(S, parsed);
+      }
+    }
+  } catch(e) {}
   await dbSet('active_project', activeProjectId);
 }
 
 // ══════════════════════════════════════
+//  PROJECT MANAGEMENT
+// ══════════════════════════════════════
+async function createProject(name, switchTo = true) {
+  const id = genId();
+  const meta = { id, name: name||'Proyek Baru', createdAt: Date.now(), updatedAt: Date.now(), wordCount: 0, chapCount: 0 };
+  projectList.push(meta);
+  // Init empty state for new project
+  const emptyState = {
+    chapters: [], characters: [],
+    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
+    proj: name||'Proyek Baru', author: '', target: 50000,
+    apiKey: S.apiKey, aiModel: S.aiModel,
+    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
+    activeWTab: 'setting', focusMode: false,
+  };
+  await dbSet('proj_' + id, JSON.stringify(emptyState));
+  await dbSet('projects', JSON.stringify(projectList));
+  if (switchTo) await switchProject(id);
+  else activeProjectId = id;
+  return id;
+}
+
+async function switchProject(id, confirmed = false) {
+  if (id === activeProjectId) { closeProjScreen(); return; }
+  if (!confirmed) {
+    await persist();
+  }
+  await persist();
+  // Reset state
+  Object.assign(S, {
+    chapters: [], characters: [],
+    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
+    proj: 'Proyek Baru', author: '', target: 50000,
+    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
+    activeWTab: 'setting', focusMode: false,
+  });
+  activeProjectId = id;
+  await loadActiveProject();
+  await dbSet('active_project', id);
+  syncSettings(); renderAll();
+  switchPanel('chapters', 0);
+  cm('proj-modal');
+  renderProjModal();
+  toast('Project: ' + S.proj);
+}
+
+async function renameProject(id, name) {
+  const meta = projectList.find(p => p.id === id);
+  if (!meta || !name) return;
+  meta.name = name.trim();
+  await dbSet('projects', JSON.stringify(projectList));
+  if (id === activeProjectId) { S.proj = meta.name; scheduleSave(); syncSettings(); }
+  toast('Nama diperbarui ✓');
+}
+
+async function deleteProject(id) {
+  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
+  projectList = projectList.filter(p => p.id !== id);
+  await dbDel('proj_' + id);
+  await dbSet('projects', JSON.stringify(projectList));
+  if (id === activeProjectId) await switchProject(projectList[0].id, true);
+  else renderProjModal();
+  toast('Project dihapus');
+}
+
+async function openProjScreen() {
+  // Trick: tulis + hapus shadow project untuk paksa IndexedDB transaction
+  // lalu re-read seluruh state project
+  const shadowKey = 'shadow_' + Date.now();
+  try {
+    await dbSet(shadowKey, '1');
+    await dbDel(shadowKey);
+  } catch(e) {}
+
+  // Re-read projects dari DB
+  try {
+    const raw = await dbGet('projects');
+    if (raw) projectList = JSON.parse(raw);
+  } catch(e) {}
+
+  // Re-read active project
+  try {
+    const aid = await dbGet('active_project');
+    if (aid && projectList.find(p => p.id === aid)) {
+      activeProjectId = aid;
+    } else if (projectList.length > 0) {
+      activeProjectId = projectList[0].id;
+    }
+  } catch(e) {}
+
+  renderProjModal();
+  om('proj-modal');
+}
+function closeProjScreen() { cm('proj-modal'); }
+function renderProjModal() {
+  const list = document.getElementById('proj-modal-list');
+  const currentId = activeProjectId;
+  if (!list) return;
+  if (!projectList.length) { list.innerHTML = '<div class="empty"><div class="emico">📁</div><div class="emttl">Belum ada project</div></div>'; return; }
+  list.innerHTML = projectList.sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0)).map(p => {
+    const isActive = p.id === currentId;
+    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '—';
+    return `<div class="chcard${isActive?' active':''}" style="${isActive?'border-color:var(--gold);background:var(--gglow);':''}" onclick="switchProject('${p.id}')">
+      <div class="chnum" style="font-size:14px;">${isActive?'✦':'📖'}</div>
+      <div class="chinf">
+        <div class="chtxt">${esc(p.name)}${isActive?' <span style="font-size:9px;color:var(--gold);">(aktif)</span>':''}</div>
+        <div class="chmeta">${p.chapCount||0} bab · ${(p.wordCount||0).toLocaleString()} kata · ${date}</div>
+      </div>
+      <div class="chacts">
+        <button class="smb" onclick="event.stopPropagation();openRenameModal('${p.id}')">✏</button>
+        <button class="smb dng" onclick="event.stopPropagation();confirmDeleteProject('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+// Rename via modal
+let _renameId = null;
+function openRenameModal(id) {
+  _renameId = id;
+  const meta = projectList.find(p => p.id === id);
+  document.getElementById('rename-input').value = meta?.name || '';
+  cm('proj-modal'); om('rename-modal');
+}
+async function confirmRename() {
+  const name = document.getElementById('rename-input').value.trim();
+  if (!name) return;
+  await renameProject(_renameId, name);
+  cm('rename-modal'); om('proj-modal'); renderProjModal();
+}
+// New project via modal
+function newProjectModal() { cm('proj-modal'); om('newproj-modal'); document.getElementById('newproj-input').value = ''; }
+async function confirmNewProject() {
+  const name = document.getElementById('newproj-input').value.trim();
+  if (!name) return;
+  await createProject(name);
+  cm('newproj-modal'); renderProjModal();
+}
+// Delete via modal confirm
+let _deleteId = null;
+function confirmDeleteProject(id) {
+  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
+  const meta = projectList.find(p => p.id === id);
+  showConfirm('Hapus Project', 'Hapus project "' + (meta?.name||'') + '"? Semua bab dan data akan hilang permanen.', () => {
+    deleteProject(id);
+  });
+}
+async function newProject() { newProjectModal(); }
+
+// ══════════════════════════════════════
 //  BOOT
 // ══════════════════════════════════════
+// Boot
+window._bootDone = true;
 openDB()
   .then(loadProjects)
   .then(async () => {
-    if (!activeProjectId) {
-      // Belum ada project sama sekali — buat project pertama
+    if (!activeProjectId && projectList.length === 0) {
       await createProject('Proyek Pertama', false);
+      await loadActiveProject();
+    } else if (!activeProjectId && projectList.length > 0) {
+      activeProjectId = projectList[0].id;
+      await loadActiveProject();
     } else {
       await loadActiveProject();
     }
   })
   .then(() => {
+    _bootReady = true;
     syncSettings();
     renderAll();
-      if (window.ftSync) window.ftSync();
+    if (window.ftSync) window.ftSync();
   })
   .catch(e => {
-    console.error('Boot error:', e);
     syncSettings(); renderAll();
     if (window.ftSync) window.ftSync();
   });
+
 
 function syncSettings() {
   document.getElementById('set-proj').value = S.proj;
@@ -1164,13 +1346,15 @@ function openChEditor(idx) {
   switchPanel('editor', 1);
 }
 function deleteCh(idx) {
-  if (!confirm('Hapus bab ini?')) return;
-  if (S.curCh === idx) S.curCh = null;
-  else if (S.curCh > idx) S.curCh--;
-  const delNum = S.chapters[idx].num;
-  S.chapters.splice(idx, 1);
-  clearChapterHistory(delNum);
-  renderChapters(); updateStats(); scheduleSave(); toast('Bab dihapus');
+  const chName = S.chapters[idx]?.title || 'bab ini';
+  showConfirm('Hapus Bab', 'Hapus "' + chName + '"? Semua isi dan riwayat bab akan hilang.', () => {
+    if (S.curCh === idx) S.curCh = null;
+    else if (S.curCh > idx) S.curCh--;
+    const delNum = S.chapters[idx].num;
+    S.chapters.splice(idx, 1);
+    clearChapterHistory(delNum);
+    renderChapters(); updateStats(); scheduleSave(); toast('Bab dihapus');
+  });
 }
 function renderChapters() {
   const list = document.getElementById('ch-list');
@@ -1262,8 +1446,10 @@ function openCarDet(idx) {
   document.getElementById('detview').classList.add('on');
 }
 function deleteCar(idx) {
-  if (!confirm('Hapus karakter ini?')) return;
-  S.characters.splice(idx,1); scheduleSave(); renderChars(); closeDet(); toast('Karakter dihapus');
+  const name = S.characters[idx]?.name || 'karakter ini';
+  showConfirm('Hapus Karakter', 'Hapus "' + name + '"? Aksi ini tidak bisa di-undo.', () => {
+    S.characters.splice(idx,1); scheduleSave(); renderChars(); closeDet(); toast('Karakter dihapus');
+  });
 }
 function closeDet() { document.getElementById('detview').classList.remove('on'); }
 
@@ -1297,7 +1483,12 @@ function renderWT(cat) {
   if (!entries.length) { p.innerHTML=`<div class="empty"><div class="emico">${WICO[cat]}</div><div class="emttl">Belum ada entri</div><div class="emdsc">Tambahkan entri untuk kategori ini.</div></div>`; return; }
   p.innerHTML=entries.map((e,i)=>`<div class="went"><div class="wetitle"><span>${WICO[cat]}</span>${esc(e.name)}</div><div class="wedesc">${esc(e.desc)}</div><div class="weacts"><button class="smb" onclick="openWorldModal(${i},'${cat}')">✏ Edit</button><button class="smb dng" onclick="deleteW('${cat}',${i})">✕ Hapus</button></div></div>`).join('');
 }
-function deleteW(cat,idx) { S.world[cat].splice(idx,1); scheduleSave(); renderWT(cat); toast('Entri dihapus'); }
+function deleteW(cat,idx) {
+  const name = S.world[cat][idx]?.name || 'entri ini';
+  showConfirm('Hapus Entri', 'Hapus "' + name + '"?', () => {
+    S.world[cat].splice(idx,1); scheduleSave(); renderWT(cat); toast('Entri dihapus');
+  });
+}
 function renderAllWorld() { ['setting','lore','magic','faction','misc'].forEach(renderWT); }
 
 // ══════════════════════════════════════
@@ -1531,132 +1722,9 @@ async function clearChapterHistory(chapterNum) {
   await dbDel(histKey(activeProjectId, chapterNum));
 }
 
-// ══════════════════════════════════════
-//  PROJECT MANAGEMENT
-// ══════════════════════════════════════
-async function createProject(name, switchTo = true) {
-  const id = genId();
-  const meta = { id, name: name||'Proyek Baru', createdAt: Date.now(), updatedAt: Date.now(), wordCount: 0, chapCount: 0 };
-  projectList.push(meta);
-  // Init empty state for new project
-  const emptyState = {
-    chapters: [], characters: [],
-    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
-    proj: name||'Proyek Baru', author: '', target: 50000,
-    apiKey: S.apiKey, aiModel: S.aiModel,
-    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
-    activeWTab: 'setting', focusMode: false,
-  };
-  await dbSet('proj_' + id, JSON.stringify(emptyState));
-  await dbSet('projects', JSON.stringify(projectList));
-  if (switchTo) await switchProject(id);
-  else activeProjectId = id;
-  return id;
-}
-
-async function switchProject(id, confirmed = false) {
-  if (id === activeProjectId) { closeProjScreen(); return; }
-  if (!confirmed) {
-    await persist();
-  }
-  await persist();
-  // Reset state
-  Object.assign(S, {
-    chapters: [], characters: [],
-    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
-    proj: 'Proyek Baru', author: '', target: 50000,
-    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
-    activeWTab: 'setting', focusMode: false,
-  });
-  activeProjectId = id;
-  await loadActiveProject();
-  await dbSet('active_project', id);
-  syncSettings(); renderAll();
-  switchPanel('chapters', 0);
-  cm('proj-modal');
-  renderProjModal();
-  toast('Project: ' + S.proj);
-}
-
-async function renameProject(id, name) {
-  const meta = projectList.find(p => p.id === id);
-  if (!meta || !name) return;
-  meta.name = name.trim();
-  await dbSet('projects', JSON.stringify(projectList));
-  if (id === activeProjectId) { S.proj = meta.name; scheduleSave(); syncSettings(); }
-  toast('Nama diperbarui ✓');
-}
-
-async function deleteProject(id) {
-  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
-  projectList = projectList.filter(p => p.id !== id);
-  await dbDel('proj_' + id);
-  await dbSet('projects', JSON.stringify(projectList));
-  if (id === activeProjectId) await switchProject(projectList[0].id, true);
-  else renderProjModal();
-  toast('Project dihapus');
-}
-
-function openProjScreen() {
-  renderProjModal();
-  om('proj-modal');
-}
-function closeProjScreen() { cm('proj-modal'); }
-function renderProjModal() {
-  const list = document.getElementById('proj-modal-list');
-  if (!list) return;
-  const currentId = activeProjectId; // snapshot current saat render
-  if (!projectList.length) { list.innerHTML = '<div class="empty"><div class="emico">📁</div><div class="emttl">Belum ada project</div></div>'; return; }
-  list.innerHTML = projectList.sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0)).map(p => {
-    const isActive = p.id === currentId;
-    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '—';
-    return `<div class="chcard${isActive?' active':''}" style="${isActive?'border-color:var(--gold);background:var(--gglow);':''}" onclick="switchProject('${p.id}')">
-      <div class="chnum" style="font-size:14px;">${isActive?'✦':'📖'}</div>
-      <div class="chinf">
-        <div class="chtxt">${esc(p.name)}${isActive?' <span style="font-size:9px;color:var(--gold);">(aktif)</span>':''}</div>
-        <div class="chmeta">${p.chapCount||0} bab · ${(p.wordCount||0).toLocaleString()} kata · ${date}</div>
-      </div>
-      <div class="chacts">
-        <button class="smb" onclick="event.stopPropagation();openRenameModal('${p.id}')">✏</button>
-        <button class="smb dng" onclick="event.stopPropagation();confirmDeleteProject('${p.id}')">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-// Rename via modal
-let _renameId = null;
-function openRenameModal(id) {
-  _renameId = id;
-  const meta = projectList.find(p => p.id === id);
-  document.getElementById('rename-input').value = meta?.name || '';
-  cm('proj-modal'); om('rename-modal');
-}
-async function confirmRename() {
-  const name = document.getElementById('rename-input').value.trim();
-  if (!name) return;
-  await renameProject(_renameId, name);
-  cm('rename-modal'); om('proj-modal'); renderProjModal();
-}
-// New project via modal
-function newProjectModal() { cm('proj-modal'); om('newproj-modal'); document.getElementById('newproj-input').value = ''; }
-async function confirmNewProject() {
-  const name = document.getElementById('newproj-input').value.trim();
-  if (!name) return;
-  await createProject(name);
-  cm('newproj-modal'); renderProjModal();
-}
-// Delete via modal confirm
-let _deleteId = null;
-function confirmDeleteProject(id) {
-  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
-  _deleteId = id;
-  const meta = projectList.find(p => p.id === id);
-  if (confirm('Hapus "' + (meta?.name||'') + '"?')) deleteProject(id);
-}
-async function newProject() { newProjectModal(); }
 
 async function clearAll() {
-  if (!confirm('Hapus semua data? Tidak bisa di-undo!')) return;
+  // sudah dikonfirmasi via showConfirm
   S.chapters=[]; S.characters=[]; S.world={setting:[],lore:[],magic:[],faction:[],misc:[]}; S.curCh=null; S.proj='Proyek Baru'; S.target=50000;
   if (activeProjectId) await dbDel('proj_' + activeProjectId);
   projectList = projectList.filter(p => p.id !== activeProjectId);
@@ -1725,16 +1793,171 @@ function aiCopy() { navigator.clipboard.writeText(S.lastAI).then(()=>toast('Disa
 function openExport() { document.getElementById('exp-title').value=S.proj; document.getElementById('exp-author').value=S.author; om('exp-modal'); }
 function getMeta() { S.proj=document.getElementById('exp-title').value||S.proj; S.author=document.getElementById('exp-author').value; return {title:S.proj,author:S.author}; }
 function dl(content,filename,type) { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=filename; a.click(); }
-function expTXT() { const {title,author}=getMeta(); let t=`${title}\n${author?'oleh '+author+'\n':''}${'═'.repeat(40)}\n\n`; const stripH=h=>h.replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<[^>]+>/g,''); S.chapters.sort((a,b)=>a.num-b.num).forEach(c=>{t+=`BAB ${c.num}: ${c.title}\n${'─'.repeat(30)}\n\n${c.contentText||stripH(c.content||'')||'(Kosong)'}\n\n\n`;}); dl(t,title+'.txt','text/plain'); toast('TXT diunduh ✓'); }
+function expTXT() { const {title,author}=getMeta(); let t=`${title}\n${author?'oleh '+author+'\n':''}${'='.repeat(40)}\n\n`; const stripH=h=>h.replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<[^>]+>/g,''); S.chapters.sort((a,b)=>a.num-b.num).forEach(c=>{t+=`BAB ${c.num}: ${c.title}\n${'-'.repeat(30)}\n\n${c.contentText||stripH(c.content||'')||'(Kosong)'}\n\n\n`;}); dl(t,title+'.txt','text/plain; charset=utf-8'); toast('TXT diunduh ✓'); }
 function expMD() { const {title,author}=getMeta(); let m=`# ${title}\n${author?`*oleh ${author}*\n\n---\n\n`:''}`; S.chapters.sort((a,b)=>a.num-b.num).forEach(c=>{m+=`## Bab ${c.num}: ${c.title}\n\n${c.synopsis?`> *${c.synopsis}*\n\n`:''}${c.content||'*(Kosong)*'}\n\n---\n\n`;}); dl(m,title+'.md','text/markdown'); toast('Markdown diunduh ✓'); }
-function expHTML() { const {title,author}=getMeta(); let body=''; S.chapters.sort((a,b)=>a.num-b.num).forEach(c=>{body+=`<section><h2>Bab ${c.num}: ${esc(c.title)}</h2>${c.synopsis?`<p class="syn">${esc(c.synopsis)}</p>`:''}<p>${(c.content||'').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')}</p></section>`;}); const html=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${esc(title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:40px 20px;background:#faf8f4;color:#2a2a2a;line-height:1.9;font-size:17px;}h1{text-align:center;font-size:28px;}h2{font-size:20px;border-bottom:1px solid #ccc;padding-bottom:6px;margin-top:50px;}p{text-indent:2em;margin:0;}.syn{font-style:italic;color:#777;text-indent:0;border-left:3px solid #c9a84c;padding-left:12px;margin-bottom:16px;}</style></head><body><h1>${esc(title)}</h1>${author?`<p style="text-align:center;color:#777;text-indent:0">oleh ${esc(author)}</p>`:''}${body}</body></html>`; dl(html,title+'.html','text/html'); toast('HTML diunduh ✓'); }
+
+function buildHTMLDoc(chaptersToExport, title, author) {
+  var sorted = chaptersToExport.slice().sort(function(a,b){return a.num-b.num;});
+  var totalWords = sorted.reduce(function(s,c){return s+cw(c.contentText||c.content||'');},0);
+
+  // TOC
+  var toc = '';
+  sorted.forEach(function(c) {
+    toc += '<li><a href="#bab' + c.num + '">Bab ' + c.num + ': ' + esc(c.title) + '</a>';
+    if (c.synopsis) toc += '<span class="toc-syn"> &mdash; ' + esc(c.synopsis) + '</span>';
+    toc += '</li>';
+  });
+
+  // Body
+  var sceneRx = /<p[^>]*(?:text-align[^:]*:[^c]*center|class[^=]*=[^s]*scenebreak)[^>]*>[^<]*<\/p>/gi;
+  var body = '';
+  sorted.forEach(function(c) {
+    var raw = (c.content || '').replace(sceneRx, '<p class="scenebreak">&middot; &middot; &middot;</p>');
+    var syn = c.synopsis ? '<p class="syn">' + esc(c.synopsis) + '</p>' : '';
+    var txt = raw || '<p class="empty">(Kosong)</p>';
+    body += '<section id="bab' + c.num + '">';
+    body += '<div class="bab-num">Bab ' + String(c.num).padStart(2,'0') + '</div>';
+    body += '<h2>' + esc(c.title) + '</h2>';
+    body += syn;
+    body += '<div class="content">' + txt + '</div>';
+    body += '</section>';
+  });
+
+  // Cover author
+  var coverAuth = author ? '<div class="cover-author">oleh ' + esc(author) + '</div>' : '';
+  var authorLine = author ? ' &nbsp;&middot;&nbsp; ' + esc(author) : '';
+  var year = new Date().getFullYear();
+
+  var css = [
+    '[data-theme="sepia"]{--bg:#f5f0e8;--bg2:#ede7d9;--bg3:#e4dcc8;--tx:#2c2416;--tx2:#5c4f3a;--tx3:#8c7d66;--gold:#9a7c3a;--gold2:#c9a84c;--cvr:linear-gradient(160deg,#2c1f0e,#1a1208);--ctx:#e8dcc8;--ctx2:#a89070;--cmeta:#5c5040;}',
+    '[data-theme="light"]{--bg:#fff;--bg2:#f5f5f5;--bg3:#e8e8e8;--tx:#1a1a1a;--tx2:#444;--tx3:#888;--gold:#7a6a2a;--gold2:#b09030;--cvr:linear-gradient(160deg,#1a1a2e,#0d0d1a);--ctx:#f0f0f0;--ctx2:#a0b0a0;--cmeta:#505060;}',
+    '[data-theme="dark"]{--bg:#1a1a1a;--bg2:#242424;--bg3:#2e2e2e;--tx:#e0e0e0;--tx2:#a0a0a0;--tx3:#606060;--gold:#c9a84c;--gold2:#e8c97a;--cvr:linear-gradient(160deg,#0a0a0a,#050505);--ctx:#e8e8e8;--ctx2:#808080;--cmeta:#404040;}',
+    '[data-theme="amoled"]{--bg:#000;--bg2:#0a0a0a;--bg3:#111;--tx:#fff;--tx2:#ccc;--tx3:#666;--gold:#c9a84c;--gold2:#e8c97a;--cvr:linear-gradient(160deg,#000,#000);--ctx:#fff;--ctx2:#888;--cmeta:#333;}',
+    '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}',
+    'html{scroll-behavior:smooth;}',
+    'body{background:var(--bg);color:var(--tx);font-family:"EB Garamond",Georgia,serif;font-size:18px;line-height:1.9;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;}',
+    '.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--cvr);color:var(--ctx);text-align:center;padding:40px 24px;position:relative;overflow:hidden;}',
+    '.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(201,168,76,.08),transparent 70%);}',
+    '.cover-ornament{font-size:24px;letter-spacing:.6em;color:var(--gold2);opacity:.7;margin-bottom:40px;}',
+    '.cover-title{font-family:"Lora",serif;font-size:clamp(26px,7vw,52px);font-weight:600;line-height:1.2;margin-bottom:16px;}',
+    '.cover-divider{width:60px;height:1px;background:var(--gold2);margin:20px auto;opacity:.6;}',
+    '.cover-author{font-style:italic;font-size:clamp(13px,3vw,17px);color:var(--ctx2);letter-spacing:.08em;}',
+    '.cover-meta{margin-top:48px;font-size:12px;color:var(--cmeta);letter-spacing:.12em;text-transform:uppercase;}',
+    '.topnav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--bg3);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;gap:16px;}',
+    '.topnav-title{font-family:"Lora",serif;font-size:14px;font-weight:500;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+    '.topnav-toc{font-size:12px;color:var(--gold);text-decoration:none;letter-spacing:.05em;white-space:nowrap;}',
+    '.topnav-toc:hover{color:var(--gold2);}',
+    '.wrapper{max-width:680px;margin:0 auto;padding:0 24px;}',
+    '.toc-section{padding:60px 0 40px;}',
+    '.toc-section h2{font-family:"Lora",serif;font-size:13px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--tx3);margin-bottom:24px;}',
+    '.toc-list{list-style:none;}',
+    '.toc-list li{padding:9px 0;border-bottom:1px solid var(--bg3);display:flex;align-items:baseline;gap:10px;}',
+    '.toc-list a{font-family:"Lora",serif;font-size:15px;color:var(--tx);text-decoration:none;font-weight:500;flex-shrink:0;}',
+    '.toc-list a:hover{color:var(--gold);}',
+    '.toc-syn{font-size:13px;color:var(--tx3);font-style:italic;}',
+    'section{padding:72px 0 40px;border-top:1px solid var(--bg3);}',
+    'section:first-of-type{border-top:none;}',
+    '.bab-num{font-family:"Lora",serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}',
+    'h2{font-family:"Lora",serif;font-size:clamp(20px,5vw,28px);font-weight:600;color:var(--tx);line-height:1.3;margin-bottom:20px;}',
+    '.syn{font-style:italic;color:var(--tx3);font-size:15px;border-left:3px solid var(--gold2);padding:8px 0 8px 16px;margin-bottom:32px;line-height:1.6;}',
+    '.content p{text-indent:2em;margin-bottom:0;}',
+    '.content p:first-child{text-indent:0;}',
+    '.content p+p{margin-top:.4em;}',
+    '.scenebreak{text-align:center!important;text-indent:0!important;letter-spacing:.5em;color:var(--tx3);margin:2em 0!important;}',
+    '.empty{color:var(--tx3);font-style:italic;text-indent:0!important;}',
+    '.doc-footer{text-align:center;padding:60px 24px 80px;font-size:12px;color:var(--tx3);letter-spacing:.08em;}',
+    '.doc-footer strong{color:var(--gold);}',
+    '.theme-sw{position:fixed;bottom:20px;right:16px;z-index:200;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}',
+    '.theme-sw-toggle{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:1px solid var(--bg3);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.2);}',
+    '.theme-sw-panel{display:none;background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;padding:8px;gap:5px;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.25);}',
+    '.theme-sw-panel.on{display:flex;}',
+    '.theme-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--bg3);background:none;color:var(--tx2);font-size:12px;cursor:pointer;font-family:inherit;text-align:left;white-space:nowrap;}',
+    '.theme-btn:hover,.theme-btn.on{background:var(--bg3);color:var(--tx);}',
+    '@media(max-width:480px){body{font-size:16px;}.wrapper{padding:0 18px;}.topnav{padding:9px 18px;}}',
+    '@media print{.topnav,.theme-sw{display:none;}.cover{min-height:auto;padding:60px 24px;page-break-after:always;background:#fff!important;color:#000!important;}.cover-title{color:#000!important;}.cover-ornament,.cover-divider{opacity:.3;}body{background:#fff!important;color:#000!important;}section{border-color:#ccc!important;}.bab-num{color:#555!important;}.syn{border-color:#999!important;}}'
+  ].join('\n');
+
+  var gfonts = 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap';
+
+  var themeScript = [
+    'function setTheme(t){',
+    '  document.documentElement.setAttribute("data-theme",t);',
+    '  document.querySelectorAll(".theme-btn").forEach(function(b){b.classList.remove("on");});',
+    '  var m={"sepia":0,"light":1,"dark":2,"amoled":3};',
+    '  var btns=document.querySelectorAll(".theme-btn");',
+    '  if(btns[m[t]])btns[m[t]].classList.add("on");',
+    '  try{localStorage.setItem("scrip-theme",t);}catch(e){}',
+    '  document.getElementById("tsp").classList.remove("on");',
+    '}',
+    'try{var s=localStorage.getItem("scrip-theme");if(s)setTheme(s);}catch(e){}',
+    'var cur=document.documentElement.getAttribute("data-theme")||"sepia";',
+    'var m2={"sepia":0,"light":1,"dark":2,"amoled":3};',
+    'var btns2=document.querySelectorAll(".theme-btn");',
+    'if(btns2[m2[cur]])btns2[m2[cur]].classList.add("on");'
+  ].join('\n');
+
+  var out = '<!DOCTYPE html>\n';
+  out += '<html lang="id" data-theme="sepia">\n';
+  out += '<head>\n';
+  out += '<meta charset="UTF-8">\n';
+  out += '<meta name="viewport" content="width=device-width,initial-scale=1.0">\n';
+  out += '<title>' + esc(title) + '</title>\n';
+  out += '<link href="' + gfonts + '" rel="stylesheet">\n';
+  out += '<style>\n' + css + '\n</style>\n';
+  out += '</head>\n<body>\n';
+  out += '<div class="cover">\n';
+  out += '<div class="cover-ornament">&#10070; &nbsp; &#10070; &nbsp; &#10070;</div>\n';
+  out += '<div class="cover-title">' + esc(title) + '</div>\n';
+  out += '<div class="cover-divider"></div>\n';
+  out += coverAuth + '\n';
+  out += '<div class="cover-meta">' + sorted.length + ' bab &nbsp;&middot;&nbsp; ' + totalWords.toLocaleString() + ' kata</div>\n';
+  out += '</div>\n';
+  out += '<div class="topnav"><div class="topnav-title">' + esc(title) + '</div>';
+  out += '<a href="#toc" class="topnav-toc">&#8593; Daftar Isi</a></div>\n';
+  out += '<div class="wrapper">\n';
+  out += '<div class="toc-section" id="toc"><h2>Daftar Isi</h2><ul class="toc-list">' + toc + '</ul></div>\n';
+  out += body + '\n';
+  out += '</div>\n';
+  out += '<div class="doc-footer"><strong>' + esc(title) + '</strong>' + authorLine + '<br>Dibuat dengan Scriptorium &nbsp;&middot;&nbsp; ' + year + '</div>\n';
+  out += '<div class="theme-sw">';
+  out += '<div class="theme-sw-panel" id="tsp">';
+  out += '<button class="theme-btn" onclick="setTheme(\'sepia\')">&#9749; Sepia</button>';
+  out += '<button class="theme-btn" onclick="setTheme(\'light\')">&#9728; Terang</button>';
+  out += '<button class="theme-btn" onclick="setTheme(\'dark\')">&#9790; Gelap</button>';
+  out += '<button class="theme-btn" onclick="setTheme(\'amoled\')">&#9899; AMOLED</button>';
+  out += '</div>';
+  out += '<button class="theme-sw-toggle" onclick="document.getElementById(\'tsp\').classList.toggle(\'on\')" title="Tema">&#127775;</button>';
+  out += '</div>\n';
+  out += '<script>\n' + themeScript + '\n<\/script>\n';
+  out += '</body></html>';
+  return out;
+}
+function expHTMLCopy() {
+  getMeta();
+  if (!S.chapters.length) { toast('Tidak ada bab'); return; }
+  const html = buildHTMLDoc(S.chapters, S.proj, S.author);
+  navigator.clipboard.writeText(html).then(() => toast('HTML disalin ✓')).catch(() => toast('Gagal menyalin'));
+}
+function expHTML() {
+  getMeta();
+  if (!S.chapters.length) { toast('Tidak ada bab'); return; }
+  const html = buildHTMLDoc(S.chapters, S.proj, S.author);
+  dl(html, S.proj + '.html', 'text/html');
+  toast('HTML diunduh ✓');
+}
 function expJSON() { getMeta(); const bk={...S}; delete bk.lastAI; delete bk.apiKey; dl(JSON.stringify(bk,null,2),'scriptorium-backup.json','application/json'); toast('Backup disimpan ✓'); }
 
 // ══════════════════════════════════════
 //  STATS & UTILS
 // ══════════════════════════════════════
-function cw(t) { return t.trim() ? t.trim().split(/\s+/).length : 0; }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cw(t) {
+  if (!t || !t.trim()) return 0;
+  // Strip HTML tags kalau ada
+  var clean = t.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&[a-z]+;/g, ' ');
+  clean = clean.replace(/\s+/g, ' ').trim();
+  return clean ? clean.split(' ').length : 0;
+}
+function esc(s) { const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
 function updateStats() {
   const tw=S.chapters.reduce((s,c)=>s+cw(c.contentText||c.content||''),0);
   const pct=S.target?Math.min(100,Math.round(tw/S.target*100)):0;
@@ -1766,7 +1989,12 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && e.key==='b') { e.preventDefault(); ins('bold'); }
   if ((e.ctrlKey||e.metaKey) && e.key==='i') { e.preventDefault(); ins('italic'); }
 });
-setInterval(saveCh, 30000);
+setInterval(function() {
+  if (!_bootReady || S.curCh === null || !S.chapters[S.curCh]) return;
+  S.chapters[S.curCh].content = ed.innerHTML;
+  S.chapters[S.curCh].contentText = ed.innerText;
+  scheduleSave();
+}, 30000);
 
 // ── Expose to global scope for HTML onclick ──
 window.aiAppend = aiAppend;
@@ -1799,8 +2027,12 @@ window.cm = cm;
 window.collapseFT = collapseFT;
 window.deleteCh = deleteCh;
 window.deleteW = deleteW;
+window.deleteCar = deleteCar;
+window.closeDet = closeDet;
+window.openChEditor = openChEditor;
 window.doImport = doImport;
 window.expHTML = expHTML;
+window.expHTMLCopy = expHTMLCopy;
 window.expJSON = expJSON;
 window.expMD = expMD;
 window.expTXT = expTXT;
@@ -1825,6 +2057,22 @@ window.switchPanel = switchPanel;
 window.switchWTab = switchWTab;
 window.toggleFocus = toggleFocus;
 
+
+
+// ── UNIVERSAL CONFIRM ──
+function showConfirm(title, msg, onOk, okLabel = 'Hapus', danger = true) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  const btn = document.getElementById('confirm-ok');
+  btn.textContent = okLabel;
+  btn.style.background = danger ? 'var(--red)' : 'var(--gold)';
+  btn.style.borderColor = danger ? 'var(--red)' : 'var(--gold)';
+  btn.style.color = danger ? '#fff' : '#0d0c0a';
+  btn.onclick = () => { cm('confirm-modal'); onOk(); };
+  om('confirm-modal');
+}
+window.showConfirm = showConfirm;
+
 // ── EASTER EGG ──
 let eeTaps = 0, eeTimer = null;
 function logoTap() {
@@ -1844,7 +2092,6 @@ function logoTap() {
       'Semua novel bagus dimulai dari draft jelek. 🌱',
       'Hari ini target kamu: minimal satu kalimat. Go! 🚀',
       'Kalau buntu, skip dulu. Lanjut scene lain. 🔀',
-      'Semua novel bagus dimulai dari draft jelek. 🌱',
       'Kamu udah duduk, buka app-nya, itu aja udah lebih dari kebanyakan orang yang cuma bilang "pengen nulis". Sekarang tinggal ketik. 🖊️',
       'Draft pertama bukan soal bagus atau jelek — itu soal ada atau tidak ada. Selesaikan dulu, sempurnakan nanti. ⚒️',
       'Setiap penulis besar punya satu kesamaan: mereka tetap nulis bahkan waktu rasanya gak ada yang keluar dengan benar. Kamu juga bisa. 🌒',
@@ -1855,6 +2102,17 @@ function logoTap() {
       '"Start writing, no matter what. The water does not flow until the faucet is turned on." — Louis L\'Amour 🚿',
       '"The first draft is just you telling yourself the story." — Terry Pratchett 🌀',
       '"There is no greater agony than bearing an untold story inside you." — Maya Angelou 🔥',
+      'Satu halaman sehari itu 365 halaman setahun. Satu novel penuh. Kamu gak perlu ngebut — cukup konsisten. 📅',
+      'Writer\'s block itu bukan tanda kamu gak berbakat. Itu tanda kamu terlalu keras menghakimi diri sendiri. Tulis aja dulu, jelek pun gak apa-apa. 🧠',
+      'Karakter-karaktermu lagi nunggu di dalam kepala kamu. Mereka punya cerita yang belum selesai. Jangan biarin mereka nunggu terlalu lama. ✨',
+      'Setiap kata yang kamu tulis hari ini adalah kata yang tidak ada kemarin. Sekecil apapun progressnya, itu tetap progress. 🌿',
+      'Penulis favorit kamu juga pernah duduk di depan halaman kosong dan gak tahu harus mulai dari mana. Bedanya mereka tetap mulai. 🏔️',
+      'Drakor ditonton jutaan orang, novel lokal sepi pembeli. Padahal cerita kita gak kalah seru. Buktikan. 🎬',
+    'Orang rela antri berjam-jam buat konser, tapi buku seharga dua kopi dibilang mahal. Anyway, tetap nulis. ☕',
+    'FYP penuh konten 15 detik, tapi ceritamu butuh ribuan kata. Justru itu yang bikin kamu beda. 📱',
+    'Semua orang mau jadi content creator, tapi penulis yang ceritanya bertahan ratusan tahun. Main panjang. 🏆',
+    'Di era ghostwriter AI merajalela, tulisan yang punya jiwa asli justru makin langka dan makin berharga. 🤖',
+      
     ];
     document.getElementById('ee-msg').textContent = msgs[Math.floor(Math.random() * msgs.length)];
     document.getElementById('ee-modal').style.display='flex';
