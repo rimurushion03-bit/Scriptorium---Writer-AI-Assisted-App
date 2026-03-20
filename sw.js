@@ -1,13 +1,13 @@
 const CACHE_NAME = 'scriptorium-v1';
+const BASE = '/Scriptorium---Writer-AI-Assisted-App/';
 const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  BASE,
+  BASE + 'index.html',
+  BASE + 'manifest.json',
+  BASE + 'icon-192.png',
+  BASE + 'icon-512.png'
 ];
 
-// Install — cache semua asset
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
@@ -16,7 +16,6 @@ self.addEventListener('install', e => {
   );
 });
 
-// Activate — hapus cache lama
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -25,9 +24,7 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch — cache first, fallback network
 self.addEventListener('fetch', e => {
-  // Skip non-GET dan cross-origin
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
 
@@ -35,13 +32,12 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(res => {
-        // Cache response baru
         if (res && res.status === 200) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return res;
-      }).catch(() => caches.match('./index.html'));
+      }).catch(() => caches.match(BASE + 'index.html'));
     })
   );
 });
