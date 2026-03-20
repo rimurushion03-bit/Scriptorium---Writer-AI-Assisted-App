@@ -364,6 +364,31 @@ body.fm #fm-wc { display: block; }
 .dfv.ser { font-family: 'Cormorant Garamond', serif; font-size: 15px; }
 .detdiv { height: 1px; background: var(--b1); margin: 13px 0; }
 
+/* ══ HISTORY ══ */
+.hist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--rsm);
+  background: var(--s2); border: 1px solid var(--b1);
+  margin-bottom: 7px; cursor: pointer; transition: .15s;
+}
+.hist-item:hover { border-color: var(--gold); background: var(--gglow); }
+.hist-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; opacity: .6; }
+.hist-dot.auto { background: var(--blue); }
+.hist-dot.manual { background: var(--green); }
+.hist-info { flex: 1; min-width: 0; }
+.hist-time { font-size: 12px; color: var(--tx); font-weight: 500; }
+.hist-meta { font-size: 10px; color: var(--tx3); font-family: 'DM Mono', monospace; margin-top: 1px; }
+.hist-preview {
+  background: var(--s3); border: 1px solid var(--b1);
+  border-radius: var(--rsm); padding: 10px 12px;
+  font-family: 'Cormorant Garamond', serif; font-size: 13px;
+  color: var(--tx2); line-height: 1.6; max-height: 120px;
+  overflow: hidden; margin: 8px 0; display: none;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+.hist-preview.on { display: block; }
+.hist-empty { text-align: center; padding: 30px 14px; color: var(--tx3); font-size: 12px; }
+
 /* ══ EMPTY STATE ══ */
 .empty { text-align: center; padding: 36px 18px; color: var(--tx3); }
 .emico { font-size: 34px; margin-bottom: 10px; opacity: .5; }
@@ -403,7 +428,15 @@ body.fm #fm-wc { display: block; }
     <!-- PANEL: BAB -->
     <div class="panel on" id="panel-chapters">
       <div class="shd">
-        <div><div class="stitle"><em>Bab &</em> Adegan</div><div class="ssub" id="proj-lbl">Proyek Baru</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div>
+            <div class="stitle"><em>Bab &</em> Adegan</div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div class="ssub" id="proj-lbl">Proyek Baru</div>
+              <button onclick="om('proj-modal')" title="Ganti Project" style="background:none;border:none;cursor:pointer;color:var(--tx3);font-size:13px;padding:0 2px;line-height:1;transition:.15s;" onmouseover="this.style.color='var(--gold2)'" onmouseout="this.style.color='var(--tx3)'">📁</button>
+            </div>
+          </div>
+        </div>
         <button class="addbtn" onclick="openChModal()">+ Bab</button>
       </div>
       <div class="statbar">
@@ -420,11 +453,12 @@ body.fm #fm-wc { display: block; }
       <div id="wcbar">
         <span id="wc-txt">0 kata</span>
         <span id="wc-ch" class="chlbl">—</span>
+        <button id="hist-btn" onclick="openHistory()" title="Riwayat" style="display:none;background:none;border:none;cursor:pointer;color:var(--tx3);font-size:13px;padding:0 4px;transition:.15s;" onmouseover="this.style.color='var(--gold2)'" onmouseout="this.style.color='var(--tx3)'">🕐</button>
       </div>
       <input id="etitle" placeholder="Judul bab...">
       <div id="editor-content" contenteditable="true" spellcheck="true" data-placeholder="Mulai menulis kisahmu di sini...
 
-Ketuk 🪶 untuk toolbar."></div>
+Ketuk ✍ untuk toolbar."></div>
     </div>
 
     <!-- PANEL: KARAKTER -->
@@ -473,7 +507,7 @@ Ketuk 🪶 untuk toolbar."></div>
 </div><!-- /app -->
 
 <!-- FLOATING TOOLBAR BUBBLE -->
-<div id="ftb">🪶</div>
+<div id="ftb">✍</div>
 
 <!-- FLOATING TOOLBAR PANEL -->
 <div id="ftp">
@@ -501,12 +535,88 @@ Ketuk 🪶 untuk toolbar."></div>
 
 <!-- TOAST -->
 <!-- EASTER EGG MODAL -->
+<!-- PROJECT MODAL -->
+<div class="mbk" id="proj-modal">
+  <div class="mdl">
+    <div class="mhnd"></div>
+    <div class="mhdr">
+      <div class="mtitle">📁 Proyek</div>
+      <button class="mclose" onclick="cm('proj-modal')">×</button>
+    </div>
+    <div class="mbdy">
+      <div id="proj-modal-list"></div>
+      <button class="bpri" style="width:100%;padding:10px;border-radius:var(--rsm);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:8px;" onclick="newProjectModal()">+ Proyek Baru</button>
+    </div>
+  </div>
+</div>
+
+<!-- RENAME PROJECT MODAL -->
+<div class="mbk" id="rename-modal">
+  <div class="mdl">
+    <div class="mhnd"></div>
+    <div class="mhdr"><div class="mtitle">Rename Proyek</div><button class="mclose" onclick="cm('rename-modal')">×</button></div>
+    <div class="mbdy">
+      <div class="fg"><label class="fl">Nama Baru</label><input class="fi" id="rename-input" placeholder="Nama proyek..."></div>
+    </div>
+    <div class="mftr">
+      <button class="bsec" onclick="cm('rename-modal')">Batal</button>
+      <button class="bpri" onclick="confirmRename()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROJECT MODAL -->
+<div class="mbk" id="newproj-modal">
+  <div class="mdl">
+    <div class="mhnd"></div>
+    <div class="mhdr"><div class="mtitle">Proyek Baru</div><button class="mclose" onclick="cm('newproj-modal')">×</button></div>
+    <div class="mbdy">
+      <div class="fg"><label class="fl">Nama Proyek</label><input class="fi" id="newproj-input" placeholder="Judul novel..."></div>
+    </div>
+    <div class="mftr">
+      <button class="bsec" onclick="cm('newproj-modal')">Batal</button>
+      <button class="bpri" onclick="confirmNewProject()">Buat</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="mbk" id="hist-modal">
+  <div class="mdl" style="max-height:85vh;">
+    <div class="mhnd"></div>
+    <div class="mhdr">
+      <div>
+        <div class="mtitle">🕐 Riwayat Versi</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:2px;" id="hist-modal-sub">—</div>
+      </div>
+      <button class="mclose" onclick="cm('hist-modal')">×</button>
+    </div>
+    <div class="mbdy" id="hist-modal-body"></div>
+  </div>
+</div>
+
+<!-- RESTORE CONFIRM MODAL -->
+<div class="mbk" id="restore-modal">
+  <div class="mdl">
+    <div class="mhnd"></div>
+    <div class="mhdr"><div class="mtitle">Pulihkan Versi?</div><button class="mclose" onclick="cm('restore-modal')">×</button></div>
+    <div class="mbdy">
+      <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:10px;">Konten bab saat ini akan diganti dengan versi yang dipilih. Versi saat ini akan otomatis disimpan ke history dulu.</div>
+      <div class="hist-preview on" id="restore-preview" style="max-height:160px;"></div>
+    </div>
+    <div class="mftr">
+      <button class="bsec" onclick="cm('restore-modal');om('hist-modal')">Batal</button>
+      <button class="bpri" onclick="confirmRestore()">✓ Pulihkan</button>
+    </div>
+  </div>
+</div>
+
 <div id="ee-modal" style="position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
   <div style="background:var(--s2);border:1px solid var(--b2);border-radius:18px;padding:20px 18px;width:80%;max-width:300px;text-align:center;animation:sup .25s cubic-bezier(.34,1.56,.64,1);">
     <div style="font-size:28px;margin-bottom:6px;display:inline-block;animation:eespin 3s linear infinite;">✦</div>
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold2);margin-bottom:10px;">Hey, you found me!</div>
     <div id="ee-msg" style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px;min-height:36px;font-style:italic;"></div>
-    <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">Btw recehannya tuan 🪙</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">Btw recehannya tuan 🗿</div>
     <a href="https://trakteer.id/AntoSJ13" target="_blank"
       style="display:block;background:linear-gradient(135deg,#e8622a,#c94a1a);color:#fff;border-radius:20px;padding:9px;font-size:12px;font-weight:600;text-decoration:none;margin-bottom:6px;letter-spacing:.04em;">
       ☕ TRAKTEER
@@ -710,6 +820,11 @@ const dbDel = k => new Promise((res, rej) => { const r = db.transaction('kv','re
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
+// Project management state
+let activeProjectId = null;
+let projectList = [];
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
 const S = {
   chapters: [], characters: [],
   world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
@@ -722,23 +837,72 @@ const S = {
 let saveT;
 function scheduleSave() { clearTimeout(saveT); saveT = setTimeout(persist, 1500); }
 async function persist() {
-  if (!db) return;
+  if (!db || !activeProjectId) return;
   const d = { ...S }; delete d.lastAI;
-  await dbSet('state', JSON.stringify(d));
+  await dbSet('proj_' + activeProjectId, JSON.stringify(d));
+  const meta = projectList.find(p => p.id === activeProjectId);
+  if (meta) {
+    meta.name = S.proj;
+    meta.wordCount = S.chapters.reduce((s,c)=>s+cw(c.contentText||c.content||''),0);
+    meta.chapCount = S.chapters.length;
+    meta.updatedAt = Date.now();
+    await dbSet('projects', JSON.stringify(projectList));
+  }
 }
-async function loadState() {
-  const raw = await dbGet('state');
+async function loadProjects() {
+  const raw = await dbGet('projects');
+  if (raw) try { projectList = JSON.parse(raw); } catch(e) {}
+  if (projectList.length === 0) {
+    const oldRaw = await dbGet('state');
+    if (oldRaw) {
+      try {
+        const oldData = JSON.parse(oldRaw);
+        const id = genId();
+        projectList = [{ id, name: oldData.proj||'Proyek Lama', createdAt: Date.now(), updatedAt: Date.now(), wordCount: 0, chapCount: (oldData.chapters||[]).length }];
+        await dbSet('proj_' + id, oldRaw);
+        await dbSet('projects', JSON.stringify(projectList));
+        activeProjectId = id;
+        return;
+      } catch(e) {}
+    }
+  }
+  const lastActive = await dbGet('active_project');
+  if (lastActive && projectList.find(p => p.id === lastActive)) {
+    activeProjectId = lastActive;
+  } else if (projectList.length > 0) {
+    activeProjectId = projectList[0].id;
+  }
+}
+async function loadActiveProject() {
+  if (!activeProjectId) return;
+  const raw = await dbGet('proj_' + activeProjectId);
   if (raw) try { Object.assign(S, JSON.parse(raw)); } catch(e) {}
+  await dbSet('active_project', activeProjectId);
 }
 
 // ══════════════════════════════════════
 //  BOOT
 // ══════════════════════════════════════
-openDB().then(loadState).then(() => {
-  syncSettings();
-  renderAll();
-  if (window.ftSync) window.ftSync();
-}).catch(() => { syncSettings(); renderAll(); if (window.ftSync) window.ftSync(); });
+openDB()
+  .then(loadProjects)
+  .then(async () => {
+    if (!activeProjectId) {
+      // Belum ada project sama sekali — buat project pertama
+      await createProject('Proyek Pertama', false);
+    } else {
+      await loadActiveProject();
+    }
+  })
+  .then(() => {
+    syncSettings();
+    renderAll();
+      if (window.ftSync) window.ftSync();
+  })
+  .catch(e => {
+    console.error('Boot error:', e);
+    syncSettings(); renderAll();
+    if (window.ftSync) window.ftSync();
+  });
 
 function syncSettings() {
   document.getElementById('set-proj').value = S.proj;
@@ -763,6 +927,7 @@ function switchPanel(name, idx) {
   const isEditor = name === 'editor';
   document.getElementById('undo-btn').classList.toggle('show', isEditor);
   document.getElementById('redo-btn').classList.toggle('show', isEditor);
+  document.getElementById('hist-btn').style.display = isEditor ? 'inline-block' : 'none';
   if (window.ftSync) window.ftSync();
 }
 
@@ -914,6 +1079,7 @@ ed.addEventListener('input', () => {
     S.chapters[S.curCh].content = ed.innerHTML;
     S.chapters[S.curCh].contentText = ed.innerText;
     scheduleSave();
+    maybeAutoSnapshot();
   }
 });
 
@@ -943,6 +1109,7 @@ function saveCh() {
   S.chapters[S.curCh].content = ed.innerHTML;
   S.chapters[S.curCh].contentText = ed.innerText;
   S.chapters[S.curCh].titleText = document.getElementById('etitle').value;
+  manualSnapshot();
   scheduleSave(); updateStats(); toast('Disimpan ✓');
 }
 
@@ -992,13 +1159,17 @@ function openChEditor(idx) {
   ed.innerHTML = c.content || '';
   document.getElementById('wc-ch').textContent = 'Bab ' + c.num;
   updateWC();
+  _histLastSnapshotWC = cw((ed.innerText||'').trim());
+  _histLastSnapshotTime = Date.now();
   switchPanel('editor', 1);
 }
 function deleteCh(idx) {
   if (!confirm('Hapus bab ini?')) return;
   if (S.curCh === idx) S.curCh = null;
   else if (S.curCh > idx) S.curCh--;
+  const delNum = S.chapters[idx].num;
   S.chapters.splice(idx, 1);
+  clearChapterHistory(delNum);
   renderChapters(); updateStats(); scheduleSave(); toast('Bab dihapus');
 }
 function renderChapters() {
@@ -1018,6 +1189,7 @@ function renderChapters() {
         ${c.synopsis ? `<div class="chsyn">${esc(c.synopsis)}</div>` : ''}
         <div class="chacts">
           <button class="smb" onclick="event.stopPropagation();openChModal(${i})">✏ Edit</button>
+          <button class="smb" onclick="event.stopPropagation();openHistoryForChapter(${i})" title="Riwayat">🕐</button>
           <button class="smb dng" onclick="event.stopPropagation();deleteCh(${i})">✕ Hapus</button>
         </div>
       </div>
@@ -1154,7 +1326,7 @@ function updateAIBtn() {
 function toggleKey() { const i=document.getElementById('set-key'); i.type=i.type==='password'?'text':'password'; }
 function doImport(e) {
   const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); if(d.chapters) Object.assign(S,d); renderAll(); scheduleSave(); toast('Data diimpor ✓'); } catch{ toast('File tidak valid'); } }; r.readAsText(f);
+  const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); if(d.chapters) { Object.assign(S,d); renderAll(); syncSettings(); scheduleSave(); toast('Data diimpor ✓'); } else { toast('File tidak valid'); } } catch{ toast('File tidak valid'); } }; r.readAsText(f);
 }
 async function checkUpdate() {
   toast('Mengecek update...');
@@ -1207,10 +1379,292 @@ async function recoverDB() {
     cm('set-modal');
   } catch(e) { toast('Gagal: ' + e.message); }
 }
+// ══════════════════════════════════════
+//  HISTORY SYSTEM
+// ══════════════════════════════════════
+const HIST_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 hari
+const HIST_MAX_PER_CHAPTER = 50;
+const HIST_WORD_THRESHOLD = 100; // snapshot tiap 100 kata baru
+const HIST_TIME_INTERVAL = 5 * 60 * 1000; // 5 menit
+
+let _histLastSnapshotWC = 0;
+let _histLastSnapshotTime = 0;
+let _histRestoreData = null; // {chIdx, content}
+
+function histKey(projectId, chapterNum) {
+  return 'hist_' + projectId + '_' + chapterNum;
+}
+
+async function getHistory(chapterNum) {
+  if (!activeProjectId) return [];
+  const raw = await dbGet(histKey(activeProjectId, chapterNum));
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch(e) { return []; }
+}
+
+async function saveHistory(chapterNum, content, type = 'auto') {
+  if (!activeProjectId || !content) return;
+  const key = histKey(activeProjectId, chapterNum);
+  let hist = await getHistory(chapterNum);
+  const now = Date.now();
+  const wc = cw(content.replace(/<[^>]+>/g,' ').trim());
+
+  // Jangan duplikat jika konten sama persis dengan snapshot terakhir
+  if (hist.length > 0 && hist[0].content === content) return;
+
+  // Tambah snapshot baru di depan
+  hist.unshift({ ts: now, wc, type, content });
+
+  // Hapus yang lebih dari 7 hari
+  hist = hist.filter(h => (now - h.ts) < HIST_MAX_AGE_MS);
+
+  // Batasi max 50 per bab
+  if (hist.length > HIST_MAX_PER_CHAPTER) hist = hist.slice(0, HIST_MAX_PER_CHAPTER);
+
+  await dbSet(key, JSON.stringify(hist));
+}
+
+async function maybeAutoSnapshot() {
+  if (S.curCh === null || !S.chapters[S.curCh]) return;
+  const now = Date.now();
+  const content = ed.innerHTML;
+  const wc = cw((ed.innerText||'').trim());
+  const wcDiff = Math.abs(wc - _histLastSnapshotWC);
+  const timeDiff = now - _histLastSnapshotTime;
+
+  if (wcDiff >= HIST_WORD_THRESHOLD || timeDiff >= HIST_TIME_INTERVAL) {
+    await saveHistory(S.chapters[S.curCh].num, content, 'auto');
+    _histLastSnapshotWC = wc;
+    _histLastSnapshotTime = now;
+  }
+}
+
+async function manualSnapshot() {
+  if (S.curCh === null || !S.chapters[S.curCh]) return;
+  const content = ed.innerHTML;
+  await saveHistory(S.chapters[S.curCh].num, content, 'manual');
+  _histLastSnapshotWC = cw((ed.innerText||'').trim());
+  _histLastSnapshotTime = Date.now();
+}
+
+function openHistory() {
+  if (S.curCh === null || !S.chapters[S.curCh]) { toast('Buka bab dulu'); return; }
+  openHistoryForChapter(S.curCh);
+}
+
+async function openHistoryForChapter(idx) {
+  const ch = S.chapters[idx];
+  if (!ch) return;
+  const hist = await getHistory(ch.num);
+  document.getElementById('hist-modal-sub').textContent = 'Bab ' + ch.num + ': ' + ch.title;
+  const body = document.getElementById('hist-modal-body');
+
+  if (!hist.length) {
+    body.innerHTML = '<div class="hist-empty">📭 Belum ada riwayat untuk bab ini.<br><span style="font-size:10px;">Riwayat otomatis tersimpan setiap 5 menit<br>atau setiap 100 kata ditulis.</span></div>';
+    om('hist-modal'); return;
+  }
+
+  const typeLabel = { auto: 'Otomatis', manual: 'Manual' };
+  const typeColor = { auto: 'var(--blue)', manual: 'var(--green)' };
+
+  body.innerHTML = hist.map((h, i) => {
+    const d = new Date(h.ts);
+    const timeStr = d.toLocaleDateString('id-ID', {day:'numeric',month:'short'}) + ' ' +
+                    d.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+    const preview = h.content.replace(/<[^>]+>/g,' ').trim().slice(0, 120);
+    return `<div class="hist-item" onclick="toggleHistPreview(${i})">
+      <div class="hist-dot ${h.type}"></div>
+      <div class="hist-info">
+        <div class="hist-time">${timeStr}</div>
+        <div class="hist-meta">${h.wc} kata · <span style="color:${typeColor[h.type]}">${typeLabel[h.type]||h.type}</span></div>
+        <div class="hist-preview" id="hprev-${i}">${esc(preview)}${preview.length>=120?'…':''}</div>
+      </div>
+      <button onclick="event.stopPropagation();openRestoreModal(${idx},${i})" style="background:var(--gdim);border:1px solid var(--gold);color:var(--gold2);border-radius:var(--rsm);padding:4px 9px;font-size:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">↩ Pulihkan</button>
+    </div>`;
+  }).join('');
+
+  om('hist-modal');
+}
+
+function toggleHistPreview(i) {
+  const el = document.getElementById('hprev-' + i);
+  if (el) el.classList.toggle('on');
+}
+
+function openRestoreModal(chIdx, histIdx) {
+  getHistory(S.chapters[chIdx]?.num).then(hist => {
+    const h = hist[histIdx];
+    if (!h) return;
+    _histRestoreData = { chIdx, content: h.content };
+    const preview = h.content.replace(/<[^>]+>/g,' ').trim().slice(0, 300);
+    document.getElementById('restore-preview').textContent = preview + (preview.length >= 300 ? '…' : '');
+    cm('hist-modal');
+    om('restore-modal');
+  });
+}
+
+async function confirmRestore() {
+  if (!_histRestoreData) return;
+  const { chIdx, content } = _histRestoreData;
+  // Snapshot versi saat ini dulu sebelum replace
+  if (S.curCh === chIdx) {
+    await saveHistory(S.chapters[chIdx].num, ed.innerHTML, 'manual');
+  } else {
+    await saveHistory(S.chapters[chIdx].num, S.chapters[chIdx].content || '', 'manual');
+  }
+  // Restore
+  S.chapters[chIdx].content = content;
+  S.chapters[chIdx].contentText = content.replace(/<[^>]+>/g,' ').trim();
+  if (S.curCh === chIdx) {
+    ed.innerHTML = content;
+    updateWC();
+    _histLastSnapshotWC = cw((ed.innerText||'').trim());
+    _histLastSnapshotTime = Date.now();
+  }
+  scheduleSave();
+  cm('restore-modal');
+  toast('Versi dipulihkan ✓');
+  _histRestoreData = null;
+}
+
+async function clearChapterHistory(chapterNum) {
+  await dbDel(histKey(activeProjectId, chapterNum));
+}
+
+// ══════════════════════════════════════
+//  PROJECT MANAGEMENT
+// ══════════════════════════════════════
+async function createProject(name, switchTo = true) {
+  const id = genId();
+  const meta = { id, name: name||'Proyek Baru', createdAt: Date.now(), updatedAt: Date.now(), wordCount: 0, chapCount: 0 };
+  projectList.push(meta);
+  // Init empty state for new project
+  const emptyState = {
+    chapters: [], characters: [],
+    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
+    proj: name||'Proyek Baru', author: '', target: 50000,
+    apiKey: S.apiKey, aiModel: S.aiModel,
+    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
+    activeWTab: 'setting', focusMode: false,
+  };
+  await dbSet('proj_' + id, JSON.stringify(emptyState));
+  await dbSet('projects', JSON.stringify(projectList));
+  if (switchTo) await switchProject(id);
+  else activeProjectId = id;
+  return id;
+}
+
+async function switchProject(id, confirmed = false) {
+  if (id === activeProjectId) { closeProjScreen(); return; }
+  if (!confirmed) {
+    await persist();
+  }
+  await persist();
+  // Reset state
+  Object.assign(S, {
+    chapters: [], characters: [],
+    world: { setting:[], lore:[], magic:[], faction:[], misc:[] },
+    proj: 'Proyek Baru', author: '', target: 50000,
+    curCh: null, editCh: null, editCar: null, editWCat: null, editWIdx: null,
+    activeWTab: 'setting', focusMode: false,
+  });
+  activeProjectId = id;
+  await loadActiveProject();
+  await dbSet('active_project', id);
+  syncSettings(); renderAll();
+  switchPanel('chapters', 0);
+  cm('proj-modal');
+  renderProjModal();
+  toast('Project: ' + S.proj);
+}
+
+async function renameProject(id, name) {
+  const meta = projectList.find(p => p.id === id);
+  if (!meta || !name) return;
+  meta.name = name.trim();
+  await dbSet('projects', JSON.stringify(projectList));
+  if (id === activeProjectId) { S.proj = meta.name; scheduleSave(); syncSettings(); }
+  toast('Nama diperbarui ✓');
+}
+
+async function deleteProject(id) {
+  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
+  projectList = projectList.filter(p => p.id !== id);
+  await dbDel('proj_' + id);
+  await dbSet('projects', JSON.stringify(projectList));
+  if (id === activeProjectId) await switchProject(projectList[0].id, true);
+  else renderProjModal();
+  toast('Project dihapus');
+}
+
+function openProjScreen() {
+  renderProjModal();
+  om('proj-modal');
+}
+function closeProjScreen() { cm('proj-modal'); }
+function renderProjModal() {
+  const list = document.getElementById('proj-modal-list');
+  if (!list) return;
+  const currentId = activeProjectId; // snapshot current saat render
+  if (!projectList.length) { list.innerHTML = '<div class="empty"><div class="emico">📁</div><div class="emttl">Belum ada project</div></div>'; return; }
+  list.innerHTML = projectList.sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0)).map(p => {
+    const isActive = p.id === currentId;
+    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '—';
+    return `<div class="chcard${isActive?' active':''}" style="${isActive?'border-color:var(--gold);background:var(--gglow);':''}" onclick="switchProject('${p.id}')">
+      <div class="chnum" style="font-size:14px;">${isActive?'✦':'📖'}</div>
+      <div class="chinf">
+        <div class="chtxt">${esc(p.name)}${isActive?' <span style="font-size:9px;color:var(--gold);">(aktif)</span>':''}</div>
+        <div class="chmeta">${p.chapCount||0} bab · ${(p.wordCount||0).toLocaleString()} kata · ${date}</div>
+      </div>
+      <div class="chacts">
+        <button class="smb" onclick="event.stopPropagation();openRenameModal('${p.id}')">✏</button>
+        <button class="smb dng" onclick="event.stopPropagation();confirmDeleteProject('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+// Rename via modal
+let _renameId = null;
+function openRenameModal(id) {
+  _renameId = id;
+  const meta = projectList.find(p => p.id === id);
+  document.getElementById('rename-input').value = meta?.name || '';
+  cm('proj-modal'); om('rename-modal');
+}
+async function confirmRename() {
+  const name = document.getElementById('rename-input').value.trim();
+  if (!name) return;
+  await renameProject(_renameId, name);
+  cm('rename-modal'); om('proj-modal'); renderProjModal();
+}
+// New project via modal
+function newProjectModal() { cm('proj-modal'); om('newproj-modal'); document.getElementById('newproj-input').value = ''; }
+async function confirmNewProject() {
+  const name = document.getElementById('newproj-input').value.trim();
+  if (!name) return;
+  await createProject(name);
+  cm('newproj-modal'); renderProjModal();
+}
+// Delete via modal confirm
+let _deleteId = null;
+function confirmDeleteProject(id) {
+  if (projectList.length <= 1) { toast('Minimal harus ada 1 project'); return; }
+  _deleteId = id;
+  const meta = projectList.find(p => p.id === id);
+  if (confirm('Hapus "' + (meta?.name||'') + '"?')) deleteProject(id);
+}
+async function newProject() { newProjectModal(); }
+
 async function clearAll() {
   if (!confirm('Hapus semua data? Tidak bisa di-undo!')) return;
   S.chapters=[]; S.characters=[]; S.world={setting:[],lore:[],magic:[],faction:[],misc:[]}; S.curCh=null; S.proj='Proyek Baru'; S.target=50000;
-  await dbDel('state'); renderAll(); toast('Data dihapus');
+  if (activeProjectId) await dbDel('proj_' + activeProjectId);
+  projectList = projectList.filter(p => p.id !== activeProjectId);
+  await dbSet('projects', JSON.stringify(projectList));
+  // Buat project baru kosong
+  await createProject('Proyek Baru', false);
+  await loadActiveProject();
+  renderAll(); toast('Data dihapus');
 }
 
 // ══════════════════════════════════════
@@ -1323,6 +1777,22 @@ window.aiReplace = aiReplace;
 window.clearAll = clearAll;
 window.debugDB = debugDB;
 window.checkUpdate = checkUpdate;
+window.openProjScreen = openProjScreen;
+window.closeProjScreen = closeProjScreen;
+window.switchProject = switchProject;
+window.renameProject = renameProject;
+window.deleteProject = deleteProject;
+window.newProject = newProject;
+window.openRenameModal = openRenameModal;
+window.confirmRename = confirmRename;
+window.newProjectModal = newProjectModal;
+window.confirmNewProject = confirmNewProject;
+window.openHistory = openHistory;
+window.openHistoryForChapter = openHistoryForChapter;
+window.openRestoreModal = openRestoreModal;
+window.confirmRestore = confirmRestore;
+window.toggleHistPreview = toggleHistPreview;
+window.confirmDeleteProject = confirmDeleteProject;
 window.recoverDB = recoverDB;
 window.closeDet = closeDet;
 window.cm = cm;
@@ -1373,6 +1843,7 @@ function logoTap() {
       'Ceritamu gak akan nulis sendiri, bos. 😤',
       'Semua novel bagus dimulai dari draft jelek. 🌱',
       'Hari ini target kamu: minimal satu kalimat. Go! 🚀',
+      'Kalau buntu, skip dulu. Lanjut scene lain. 🔀',
       'Semua novel bagus dimulai dari draft jelek. 🌱',
       'Kamu udah duduk, buka app-nya, itu aja udah lebih dari kebanyakan orang yang cuma bilang "pengen nulis". Sekarang tinggal ketik. 🖊️',
       'Draft pertama bukan soal bagus atau jelek — itu soal ada atau tidak ada. Selesaikan dulu, sempurnakan nanti. ⚒️',
@@ -1384,7 +1855,6 @@ function logoTap() {
       '"Start writing, no matter what. The water does not flow until the faucet is turned on." — Louis L\'Amour 🚿',
       '"The first draft is just you telling yourself the story." — Terry Pratchett 🌀',
       '"There is no greater agony than bearing an untold story inside you." — Maya Angelou 🔥',
-      'Kalau buntu, skip dulu. Lanjut scene lain. 🔀',
     ];
     document.getElementById('ee-msg').textContent = msgs[Math.floor(Math.random() * msgs.length)];
     document.getElementById('ee-modal').style.display='flex';
