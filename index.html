@@ -1130,6 +1130,44 @@ function doImport(e) {
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader(); r.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); if(d.chapters) Object.assign(S,d); renderAll(); scheduleSave(); toast('Data diimpor ✓'); } catch{ toast('File tidak valid'); } }; r.readAsText(f);
 }
+async function debugDB() {
+  const out = document.getElementById('debug-out');
+  out.style.display = 'block';
+  out.textContent = 'Mengecek IndexedDB...';
+  try {
+    const raw = await dbGet('state');
+    if (!raw) {
+      out.textContent = '❌ Tidak ada data di IndexedDB.\nDB kosong atau belum pernah disimpan di origin ini.';
+      return;
+    }
+    const data = JSON.parse(raw);
+    const chCount = (data.chapters||[]).length;
+    const carCount = (data.characters||[]).length;
+    const totalWords = (data.chapters||[]).reduce((s,c)=>s+((c.contentText||c.content||'').trim().split(/\s+/).filter(Boolean).length),0);
+    out.innerHTML = '✅ Data ditemukan!\n'
+      + '📖 Bab: ' + chCount + '\n'
+      + '👤 Karakter: ' + carCount + '\n'
+      + '📝 Total kata: ' + totalWords + '\n'
+      + '🏷 Proyek: ' + (data.proj||'-') + '\n\n'
+      + '<button onclick="recoverDB()" style="background:var(--green);border:none;color:#0d0c0a;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;width:100%;margin-top:4px;">⬇ Load & Download Backup</button>';
+  } catch(e) {
+    out.textContent = '❌ Error: ' + e.message;
+  }
+}
+async function recoverDB() {
+  try {
+    const raw = await dbGet('state');
+    if (!raw) { toast('Tidak ada data'); return; }
+    const data = JSON.parse(raw);
+    Object.assign(S, data);
+    renderAll(); syncSettings(); scheduleSave();
+    // Juga langsung download backup
+    const bk = {...S}; delete bk.lastAI; delete bk.apiKey;
+    dl(JSON.stringify(bk,null,2), (S.proj||'scriptorium')+'-recovery.json', 'application/json');
+    toast('Data dipulihkan & backup diunduh ✓');
+    cm('set-modal');
+  } catch(e) { toast('Gagal: ' + e.message); }
+}
 async function clearAll() {
   if (!confirm('Hapus semua data? Tidak bisa di-undo!')) return;
   S.chapters=[]; S.characters=[]; S.world={setting:[],lore:[],magic:[],faction:[],misc:[]}; S.curCh=null; S.proj='Proyek Baru'; S.target=50000;
@@ -1244,6 +1282,8 @@ window.aiCustom = aiCustom;
 window.aiDo = aiDo;
 window.aiReplace = aiReplace;
 window.clearAll = clearAll;
+window.debugDB = debugDB;
+window.recoverDB = recoverDB;
 window.closeDet = closeDet;
 window.cm = cm;
 window.collapseFT = collapseFT;
