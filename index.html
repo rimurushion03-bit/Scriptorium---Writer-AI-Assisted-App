@@ -52,17 +52,8 @@ html, body { height: 100%; background: var(--bg); color: var(--tx); font-family:
 }
 .tbbtn:hover { background: var(--gdim); border-color: var(--gold); color: var(--gold2); }
 .tbbtn:active { background: var(--gdim); border-color: var(--gold); color: var(--gold2); transition: background .4s ease-out, border-color .4s ease-out, color .4s ease-out; }
-#undo-btn, #redo-btn { display: none !important; }
-#undo-btn.show, #redo-btn.show { display: inline-flex !important; }
-.urbtn {
-  background: var(--s2); border: 1px solid var(--b1); color: var(--tx2);
-  border-radius: var(--rsm); padding: 5px 9px; font-size: 11px;
-  font-family: 'Outfit', sans-serif; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 4px;
-  transition: .15s;
-}
-.urbtn:hover { background: var(--gdim); border-color: var(--gold); color: var(--gold2); }
-.urbtn:active { background: var(--gdim); border-color: var(--gold); color: var(--gold2); transition: background .4s ease-out, border-color .4s ease-out, color .4s ease-out; }
+
+
 
 /* ══ MAIN AREA ══ */
 #main { overflow: hidden; position: relative; }
@@ -239,8 +230,7 @@ body.fm #app { grid-template-rows: auto 1fr 0; }
 body.fm #editor-content { font-size: 18px; line-height: 2.1; padding: 20px 22px 60px; }
 body.fm #wcbar { display: none; }
 body.fm #install-btn { display: none !important; }
-body.fm .tbbtn:not(#focus-btn):not(#undo-btn):not(#redo-btn) { display: none; }
-body.fm .urbtn { display: inline-flex !important; }
+body.fm .tbbtn:not(#focus-btn) { display: none; }
 body.fm .logo em { display: none; }
 body.fm #fm-wc { display: block; }
 #fm-wc { display: none; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--tx3); margin-left: 8px; }
@@ -415,8 +405,7 @@ body.fm #fm-wc { display: block; }
     <div class="tbbtns">
       <button class="tbbtn" id="install-btn" onclick="installPWA()" style="display:none;border-color:var(--gold);color:var(--gold2);">⬇ Install</button>
       <button class="tbbtn" id="focus-btn" onclick="toggleFocus()">⊡ Fokus</button>
-      <button class="urbtn" id="undo-btn" onclick="doUndo()" title="Undo">↩</button>
-      <button class="urbtn" id="redo-btn" onclick="doRedo()" title="Redo">↪</button>
+
       <button class="tbbtn" onclick="om('set-modal')">⚙</button>
       <button class="tbbtn" onclick="openExport()">⬆ Export</button>
     </div>
@@ -528,6 +517,9 @@ Ketuk ✍ untuk toolbar."></div>
     <button class="fbtn" onclick="ins('insertText','\u201c\u201d')" title="Kutip">"</button>
     <button class="fbtn" onclick="ins('insertText','\u2026')" title="Ellipsis">…</button>
     <button class="fbtn" onclick="insSceneBreak()" title="Scene break">···</button>
+    <div class="ftsep"></div>
+    <button class="fbtn" onclick="doUndo()" title="Undo">↩</button>
+    <button class="fbtn" onclick="doRedo()" title="Redo">↪</button>
   </div>
 </div>
 
@@ -1107,8 +1099,7 @@ function switchPanel(name, idx) {
   });
   document.querySelectorAll('.nbtn').forEach((b, i) => b.classList.toggle('on', i === idx));
   const isEditor = name === 'editor';
-  document.getElementById('undo-btn').classList.toggle('show', isEditor);
-  document.getElementById('redo-btn').classList.toggle('show', isEditor);
+
   document.getElementById('hist-btn').style.display = isEditor ? 'inline-block' : 'none';
   if (window.ftSync) window.ftSync();
 }
@@ -1255,6 +1246,11 @@ document.addEventListener('fullscreenchange', () => {
 //  EDITOR
 // ══════════════════════════════════════
 const ed = document.getElementById('editor-content');
+ed.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+  document.execCommand('insertText', false, text);
+});
 ed.addEventListener('input', () => {
   updateWC();
   if (S.curCh !== null && S.chapters[S.curCh]) {
@@ -1281,7 +1277,7 @@ function ins(cmd, arg) {
 }
 function insSceneBreak() {
   ed.focus();
-  document.execCommand('insertHTML', false, '<p style="text-align:center;color:var(--tx3);letter-spacing:0.4em;user-select:none;margin:0.5em 0;">· · ·</p><p></p>');
+  document.execCommand('insertHTML', false, '<p style="text-align:center;color:var(--tx3);letter-spacing:0.4em;user-select:none;margin:0.5em 0;">· · ·</p><p style="text-align:left;"><br></p>');
   updateWC();
 }
 function doUndo() { if(document.getElementById('panel-editor').classList.contains('on')){ ed.focus(); document.execCommand('undo'); updateWC(); } }
@@ -1334,7 +1330,10 @@ function saveCh2() {
   cm('ch-modal'); renderChapters(); updateStats(); scheduleSave(); toast('Bab disimpan ✓');
 }
 function openChEditor(idx) {
-  saveCh();
+  // Hanya save jika ada konten aktif yang valid
+  if (S.curCh !== null && S.chapters[S.curCh] && ed.innerHTML.trim() && ed.innerHTML !== '<br>') {
+    saveCh();
+  }
   S.curCh = idx;
   const c = S.chapters[idx];
   document.getElementById('etitle').value = c.titleText || c.title;
@@ -1344,6 +1343,7 @@ function openChEditor(idx) {
   _histLastSnapshotWC = cw((ed.innerText||'').trim());
   _histLastSnapshotTime = Date.now();
   switchPanel('editor', 1);
+  ed.focus();
 }
 function deleteCh(idx) {
   const chName = S.chapters[idx]?.title || 'bab ini';
@@ -2108,11 +2108,10 @@ function logoTap() {
       'Setiap kata yang kamu tulis hari ini adalah kata yang tidak ada kemarin. Sekecil apapun progressnya, itu tetap progress. 🌿',
       'Penulis favorit kamu juga pernah duduk di depan halaman kosong dan gak tahu harus mulai dari mana. Bedanya mereka tetap mulai. 🏔️',
       'Drakor ditonton jutaan orang, novel lokal sepi pembeli. Padahal cerita kita gak kalah seru. Buktikan. 🎬',
-    'Orang rela antri berjam-jam buat konser, tapi buku seharga dua kopi dibilang mahal. Anyway, tetap nulis. ☕',
-    'FYP penuh konten 15 detik, tapi ceritamu butuh ribuan kata. Justru itu yang bikin kamu beda. 📱',
-    'Semua orang mau jadi content creator, tapi penulis yang ceritanya bertahan ratusan tahun. Main panjang. 🏆',
-    'Di era ghostwriter AI merajalela, tulisan yang punya jiwa asli justru makin langka dan makin berharga. 🤖',
-      
+      'Orang rela antri berjam-jam buat konser, tapi buku seharga dua kopi dibilang mahal. Anyway, tetap nulis. ☕',
+      'FYP penuh konten 15 detik, tapi ceritamu butuh ribuan kata. Justru itu yang bikin kamu beda. 📱',
+      'Semua orang mau jadi content creator, tapi penulis yang ceritanya bertahan ratusan tahun. Main panjang. 🏆',
+      'Di era ghostwriter AI merajalela, tulisan yang punya jiwa asli justru makin langka dan makin berharga. 🤖',
     ];
     document.getElementById('ee-msg').textContent = msgs[Math.floor(Math.random() * msgs.length)];
     document.getElementById('ee-modal').style.display='flex';
